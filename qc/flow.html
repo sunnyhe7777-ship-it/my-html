@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"><title>打标流程概览</title>
+<style>
+:root{color-scheme:light}
+body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#f6f7f9;color:#222;margin:0;padding:28px 20px 40px}
+.wrap{max-width:1180px;margin:auto}
+.layout{display:grid;grid-template-columns:1fr 250px;gap:16px;align-items:start}
+.panel h2{font-size:14px;margin:0 0 4px}
+.panel .intro{font-size:12px;color:#888;margin-bottom:8px;line-height:1.5}
+.pcard{background:#fff;border:1px solid #e3e5ea;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:12px;line-height:1.6}
+.pcard b{display:block;font-size:13px;color:#1B365D}
+.panel .g{color:#2e7d32} .panel .o{color:#e37b00}
+h1{font-size:20px;margin:0 0 2px} .sub{color:#777;font-size:12px;margin-bottom:18px}
+.stage{display:flex;gap:14px;align-items:stretch;margin-bottom:0}
+.gate{flex:none;width:250px;background:#fff;border:1px solid #e3e5ea;border-left:4px solid #1B365D;border-radius:8px;padding:10px 14px}
+.gate b{display:block;font-size:14px} .gate .q{color:#555;font-size:12px;margin-top:2px}
+.pass{display:inline-block;margin-top:6px;background:#eef3ea;color:#2e7d32;border-radius:4px;padding:1px 8px;font-size:12px;font-weight:600}
+.badge{display:inline-block;margin-left:6px;border-radius:10px;padding:1px 8px;font-size:11px;font-weight:700;vertical-align:1px;letter-spacing:.5px}
+.keep{background:#e37b00;color:#fff} .drop{background:#2e7d32;color:#fff}
+.legend{font-size:12px;color:#555;margin:-10px 0 14px}
+.legend .badge{margin:0 4px 0 10px}
+.outs{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-content:center}
+.tag{background:#fff;border:1px solid #e3e5ea;border-radius:6px;padding:6px 10px;font-size:12px;line-height:1.45}
+.tag b{color:#1B365D}
+.end{background:#f3f1ea;color:#666}
+.arrow{color:#bbb;font-size:13px;line-height:1;margin:2px 0 2px 118px}
+.l3{background:#fff;border:1px solid #e3e5ea;border-left:4px solid #1B365D;border-radius:8px;padding:12px 14px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.col{border-radius:8px;padding:10px 12px}
+.col h3{margin:0 0 6px;font-size:13px}
+.col ul{margin:0;padding-left:16px;font-size:12px;line-height:1.7}
+.vio{background:#fdf2f2} .vio h3{color:#a61b1b}
+.fra{background:#f6f1fa} .fra h3{color:#7d3c98}
+.ba{margin-top:8px;background:#f1f8f2;border-radius:8px;padding:8px 12px;font-size:12px;color:#2e7d32}
+.side{display:flex;gap:12px;margin-top:14px}
+.side .box{flex:1;background:#fff;border:1px dashed #c5c8d0;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6}
+.side b{display:block;font-size:13px;margin-bottom:2px}
+.rule{margin-top:14px;background:#fff;border:1px solid #e3e5ea;border-radius:8px;padding:12px 14px}
+.rule h2{font-size:14px;margin:0 0 8px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pair .p{border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7}
+.pair h3{margin:0 0 4px;font-size:13px}
+.ev{background:#f4f7fb} .ev h3{color:#1B365D}
+.fin{background:#fdf6ec} .fin h3{color:#8a5a00}
+.note{font-size:12px;color:#888;margin-top:14px;line-height:1.7}
+.tier{display:inline-block;min-width:34px;text-align:center;border-radius:3px;color:#fff;font-size:11px;padding:0 4px;margin-right:4px}
+</style></head><body><div class="wrap">
+<h1>打标流程概览</h1>
+<div class="sub">催收短信 / WhatsApp / 电话 · 按判定顺序自上而下</div>
+
+<div style="margin-bottom:22px">
+  <h2 style="font-size:16px;margin:0 0 8px">一、界面展示</h2>
+  <img src="详情页示例.png" alt="质检详情页示例" style="width:100%;border:1px solid #e3e5ea;border-radius:8px">
+  <div class="note" style="margin-top:6px">详情页右上的“识别标签”是终局，只留有结论的项；它下方的“各维度明细与证据”是证据链，每个环节都在，包括通过的 VALID、“相关”和 NORMAL。界面上每个维度都显示置信度，但只有 L3 违规行为和两处例外会出现“疑似”，其余恒为“确定”。</div>
+</div>
+
+<h2 style="font-size:16px;margin:0 0 10px">二、打标链路与终局展示规则</h2>
+<div class="layout"><div class="flow">
+<div class="stage">
+  <div class="gate"><b>第 0 步 · 技术校验</b><div class="q">录音、转写、接口是否技术异常</div><span class="pass">否 → 继续</span></div>
+  <div class="outs"><div class="tag end"><b>是 → N</b><br>仅限技术异常，到此结束，不再进入 L1</div></div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="stage">
+  <div class="gate"><b>L1 · 内容有效性</b><div class="q">催员侧内容能不能被质检</div><span class="pass">VALID → 继续</span></div>
+  <div class="outs">
+    <div class="tag end"><b>IN 信息片段</b><br>意图识别不出：裸姓名、裸链接、单个词</div>
+    <div class="tag end"><b>BB 催员端无音频</b><br>仅电话</div>
+    <div class="tag end"><b>BH 噪音过高</b><br>仅电话</div>
+  </div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="stage">
+  <div class="gate"><b>L2 · 催收相关性</b><div class="q">催员是否在催收</div><span class="pass">相关 → 继续</span></div>
+  <div class="outs"><div class="tag"><b>BC 催收无关</b><br>本身是终局标签，同时不阻断 L3：催员侧出现暴力或欺诈时，BC 与违规标签共存</div></div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="l3">
+  <b style="font-size:14px">L3 · 违规</b>　<span style="color:#555;font-size:12px">可多选，每个行为各自带 确定 / 疑似 和命中原文证据</span>
+  <div class="cols">
+    <div class="col vio"><h3>暴力催收 · 13 个行为</h3>
+      <ul>
+        <li><span class="tier" style="background:#a61b1b">A</span>威胁伤害/杀害、侮辱辱骂、性骚扰</li>
+        <li><span class="tier" style="background:#d9534f">B</span>威胁公开曝光、威胁通知全部联系人、向第三方转达/透露债务、定位/上门威胁、社媒追踪</li>
+        <li><span class="tier" style="background:#f0ad4e">C</span>虚构法律后果、指控客户欺诈、模糊信息处置威胁、限时施压（≤60 分钟且必须带明示后果，只有时限不算）、模糊后果暗示</li>
+      </ul>
+    </div>
+    <div class="col fra"><h3>欺诈 / 私收款 · 依赖白名单</h3>
+      <ul>
+        <li><b>BE</b> 非官方收款</li>
+        <li><b>BF</b> 展期越权</li>
+        <li><b>BI</b> 减免越权</li>
+        <li><b>BG</b> 冒充 / 非官方客服</li>
+        <li>未配置白名单时，一律标疑似</li>
+      </ul>
+    </div>
+  </div>
+  <div class="ba"><b>两者都没有 → BA 无违规</b>　催收相关，但没有命中任何违规行为</div>
+</div>
+
+<div class="side">
+  <div class="box"><b>旁路 · 线路状态（仅电话）</b>NORMAL / I 语音信箱 / J 系统提示 / L 秒挂 / M 全程静音 / R 无关应答。与主流程并行，不决定是否违规。</div>
+  <div class="box"><b>旁路 · 催员行为（仅电话）</b>HT 疑似无效占线。独立于违规，不计入违规率。</div>
+</div>
+
+</div>
+<div class="panel">
+  <h2>标签展示规则</h2>
+  <div class="intro">与左侧环节一一对应。绿色为通过项，只在证据链；橙色进入识别标签。</div>
+  <div class="pcard"><b>第 0 步</b><span class="g">否 · 不进终局</span><br><span class="o">N · 终局</span></div>
+  <div class="pcard"><b>L1 · 内容有效性</b><span class="g">VALID · 不进终局</span><br><span class="o">IN、BB、BH · 终局</span></div>
+  <div class="pcard"><b>L2 · 催收相关性</b><span class="g">相关 · 不进终局</span><br><span class="o">BC · 终局</span></div>
+  <div class="pcard"><b>L3 · 违规</b><span class="o">命中的违规行为 · 终局</span><br><span class="o">BA · 终局</span></div>
+  <div class="pcard"><b>线路状态 · 仅电话</b><span class="g">NORMAL · 不进终局</span><br><span class="o">异常 · 终局</span></div>
+  <div class="pcard"><b>催员行为 · 仅电话</b><span class="o">HT · 终局</span></div>
+</div></div>
+
+<div class="rule">
+  <h2>三、一条记录的三个输出</h2>
+  <div class="pair">
+    <div class="p ev"><h3>各维度明细与证据 · 证据链</h3>
+      每个环节的判定都留在这里，包括通过的项。用于复核时回看为什么走到这一步，类似检测网络里每一跳的日志。</div>
+    <div class="p fin"><h3>识别标签 · 终局</h3>
+      只展示有结论的项，通过的环节不出现。L1 判为 VALID 时，识别标签里没有 L1 这一项。各环节哪些进终局，见右侧对照。</div>
+    <div class="p" style="background:#f6f7f2;grid-column:1 / -1"><h3 style="color:#555">置信度 · 确定 / 疑似</h3>
+    主要挂在 L3 的违规行为上，每个行为各自带。确定：要素齐全、表述明确、不依赖外部核实。疑似：缺白名单、真实性待核实、内容截断或语义偏弱；语音无说话人区分时，违规一律标疑似。<br>
+    行级三档：有一个确定 → 确定违规；没有确定但有疑似 → 疑似违规；没有违规行为 → BA。违规率只算确定。<br>
+    只有两处例外也标疑似：L2 的“相关”在只有弱要素时标“相关（疑似）”，BC 不标；线路状态只有 M 在缺声道区分时标疑似，I、J、L、R 不标。</div>
+</div>
+
+<div class="note">
+规则：只有 L1 是闸门，IN / BB / BH 分流出去即结束；BC 和线路状态都不阻断违规判定；L3 是分叉，暴力与欺诈可同时命中。<br>
+多行为命中取最高档；行级置信度取“有一个确定即为确定”。档位按各子公司配置，未配置用默认档。<br>
+档位为出厂默认：A 最严重、B 严重、C 一般；如实告知征信影响、引用法条不算违规。
+</div>
+</div></body></html>

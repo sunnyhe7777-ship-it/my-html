@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI质检 一期设想 Demo（基于标签体系 v1.3）</title>
+<style>
+:root{--bg:#f5f6f8;--ink:#30343b;--muted:#8b94a3;--line:#e6ebf2;--blue:#409eff;--blue2:#ecf5ff;--red:#f56c6c;--red2:#fef0f0;--orange:#e6a23c;--orange2:#fdf6ec;--green:#67c23a;--green2:#f0f9eb;--gray:#909399}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,"Microsoft YaHei",Arial,sans-serif}
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:0 24px;display:flex;align-items:center;gap:6px;height:48px}
+.topbar .brand{font-weight:700;margin-right:16px}
+.nav{padding:13px 14px;cursor:pointer;color:#606266;border-bottom:2px solid transparent}
+.nav.active{color:var(--blue);border-color:var(--blue);font-weight:600}
+.legend{margin-left:auto;font-size:12px;color:var(--muted)}
+.view{display:none}.view.active{display:block}
+.btn{border:1px solid #dcdfe6;background:#fff;border-radius:7px;padding:8px 16px;cursor:pointer;color:#606266;font:inherit}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.btn.sm{padding:4px 10px;font-size:12px}
+.filter{background:#f7f7f8;border:1px solid #ebeef5;padding:20px 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px 22px;align-items:center}
+.field{display:grid;grid-template-columns:128px 1fr;align-items:center;gap:8px}.field label{color:#606266;white-space:nowrap}
+.field input,.field select{height:38px;width:100%;border:1px solid #dcdfe6;border-radius:7px;padding:0 10px;font:inherit;color:#606266;background:#fff}
+.actions{padding:12px 28px;display:flex;gap:12px;background:#fff;border-bottom:1px solid #ebeef5;align-items:center}
+.card{background:#fff;border:1px solid #e4e7ed;border-radius:4px;margin:12px}
+.card-h{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.card-h h2{font-size:15px;margin:0}.note{font-size:12px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;border-radius:4px;padding:2px 7px;font-size:12px;white-space:nowrap;margin:1px 3px 1px 0}
+.p-green{background:var(--green2);color:var(--green)}.p-red{background:var(--red2);color:var(--red)}.p-orange{background:var(--orange2);color:var(--orange)}.p-gray{background:#f4f4f5;color:var(--gray)}.p-blue{background:var(--blue2);color:var(--blue)}.p-purple{background:#f1f3ff;color:#4b5fe1}
+.p-doubt{border:1px dashed currentColor;background:#fff}
+.ph1{background:#fef0f0;color:#f56c6c;border:1px solid #fbc4c4;font-size:11px;border-radius:3px;padding:0 5px;margin-left:5px;white-space:nowrap}.ph2{background:#eee;color:#888;font-size:11px;border-radius:3px;padding:0 5px;margin-left:5px;white-space:nowrap}.phq{background:#fff3d6;color:#b07a00;font-size:11px;border-radius:3px;padding:0 5px;margin-left:5px;white-space:nowrap}
+table.rows{width:100%;border-collapse:collapse;table-layout:fixed}
+#recWrap,#caseWrap{overflow-x:auto}#recWrap table.rows{min-width:1590px}
+.content.wrap{white-space:normal;overflow:visible}
+.rows th{text-align:left;color:#909399;font-weight:600;background:#f7f9fc}
+.rows th,.rows td{padding:10px 12px;border-bottom:1px solid #ebeef5;border-right:1px solid #ebeef5;vertical-align:middle}
+.rows th:last-child,.rows td:last-child{border-right:0}
+.content{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.link{color:var(--blue);cursor:pointer}
+.toggle{display:flex;gap:4px;background:#f4f6fa;padding:3px;border-radius:7px;margin-left:auto}
+.toggle button{border:0;background:transparent;padding:5px 10px;border-radius:5px;cursor:pointer;color:var(--muted);font:inherit;font-size:12px}
+.toggle button.active{background:#fff;color:var(--blue);box-shadow:0 1px 3px #22335518}
+.mask{display:none;position:fixed;inset:0;background:#19223b55;z-index:10}.mask.open{display:block}
+.drawer{position:absolute;right:0;top:0;height:100%;width:min(1180px,95vw);background:#fff;overflow:auto;box-shadow:-8px 0 28px #1b264433}
+.drawer-h{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);font-size:17px;font-weight:700;position:sticky;top:0;background:#fff;z-index:2}
+.close{border:0;background:transparent;font-size:28px;cursor:pointer;color:#606266}
+.grid2{display:grid;grid-template-columns:minmax(480px,1fr) 380px;gap:16px;padding:18px}
+.dcard{border:1px solid var(--line);border-radius:7px;background:#fff}
+.dtitle{padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.kv{padding:11px 16px;border-bottom:1px solid var(--line)}.kv b{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+.msg{margin:10px 16px;padding:10px 12px;border:1px solid #e6eaf2;border-radius:7px;background:#fbfcff;max-width:90%}
+.msg.user{margin-left:auto;background:#f7fcfa;border-color:#cfeee3}
+.msg.target{border-color:#ffb3a8;background:#fffafa;box-shadow:0 0 0 2px #ffe3df}
+.msg .meta{font-size:12px;color:var(--muted);margin-bottom:5px}
+.hit{background:#ffdfd9;color:#97382d;padding:1px 3px;border-radius:3px}
+.tr{display:none;border-top:1px dashed #d9dee8;margin-top:8px;padding-top:7px;color:#536176;font-size:13px;line-height:1.55}.trans-on .tr{display:block}
+.ctxmore{text-align:center;color:var(--blue);font-size:12px;padding:8px;cursor:pointer}
+.audio{height:54px;background:#f4f6fb;border-radius:8px;display:flex;align-items:center;gap:12px;padding:0 14px;margin:14px 16px}
+.play{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center}
+.bar{height:6px;background:#dce2ee;border-radius:3px;flex:1}.bar i{display:block;width:40%;height:100%;background:var(--blue);border-radius:3px}
+.turn{display:grid;grid-template-columns:90px 1fr;gap:10px;margin:12px 16px}
+.role{font-size:12px;font-weight:700;padding-top:3px}.role.c{color:#4154d8}.role.u{color:#138466}
+.speech{border-left:3px solid #d6dcfb;padding:8px 10px;background:#fafbff;border-radius:0 7px 7px 0}.role.u+.speech{border-color:#8fd2bf;background:#f7fcfa}
+.sysev{margin:8px 16px;text-align:center;font-size:12px;color:var(--muted);border-top:1px dashed #dde;border-bottom:1px dashed #dde;padding:4px}
+.lab{border:1px solid var(--line);border-radius:7px;margin:10px 16px;padding:10px 12px}
+.lab .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.lab .ev{font-size:13px;color:#42506a;margin-top:4px}
+.lab .why{font-size:12px;color:var(--orange);margin-top:4px}
+.revbox{padding:14px 16px}.ropts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.ropts button{padding:8px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font:inherit;color:#606266}
+.ropts button.active{border-color:var(--blue);background:var(--blue2);color:var(--blue)}
+.revbox textarea,.revbox select{width:100%;border:1px solid #dcdfe6;border-radius:6px;padding:8px;font:inherit;margin-top:8px}.revbox textarea{height:56px}
+.relabel{display:none;background:#fafbfd;border:1px dashed #cfd6e4;border-radius:6px;padding:8px 10px;margin-top:8px}
+.toast{display:none;margin-top:8px;padding:8px;border-radius:6px;background:var(--green2);color:var(--green);font-size:12px}
+.tabs2{display:flex;gap:4px;padding:0 16px;border-bottom:1px solid var(--line);background:#fff}
+.tabs2 div{padding:12px 14px;cursor:pointer;color:#606266;border-bottom:2px solid transparent}.tabs2 div.active{color:var(--blue);border-color:var(--blue);font-weight:600}
+.pane{display:none;padding:16px}.pane.active{display:block}
+.hint{background:var(--blue2);border:1px solid #cfe3ff;color:#3a6fb0;border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:13px}
+.warn{background:#fff8ea;border:1px solid #f3d9a4;color:#8a6410;border-radius:6px;padding:9px 12px;margin:12px 0;font-size:13px}
+select.tier{height:30px;border:1px solid #dcdfe6;border-radius:6px;padding:0 8px;font:inherit}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.metric{border:1px solid #e4e7ed;border-radius:7px;padding:12px}.metric b{font-size:20px;display:block}
+.sample{background:repeating-linear-gradient(45deg,#fff,#fff 10px,#fafafa 10px,#fafafa 20px);padding:18px}
+.sample-badge{background:#fff3d6;color:#b07a00;padding:6px 10px;border-radius:5px;font-weight:600;margin-bottom:10px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="topbar"><span class="brand">CCO 系统 · AI质检</span>
+<div class="nav active" data-v="list">AI质检明细</div><div class="nav" data-v="cfg">质检规则设置</div><div class="nav" data-v="block">发送拦截明细</div>
+<div class="legend">无标记 = 现网已有 &nbsp;<span class="ph1">一期</span> 一期新增/改动 &nbsp;<span class="phq">待定</span> 待你们定 &nbsp;<span class="ph2">后续</span> 二期及以后 &nbsp;|&nbsp; 全部为模拟数据</div></div>
+
+<!-- ========== 明细 ========== -->
+<section class="view active" id="list">
+<div class="filter">
+<div class="field"><label>上送质检时间</label><input value="2026-10-13 00:00 ~ 2026-10-27 23:59"/></div>
+<div class="field"><label>渠道类型</label><select id="fCh"><option value="">请选择</option><option value="sms">短信</option><option value="wa">WhatsApp</option><option value="phone">电话语音</option></select></div>
+<div class="field"><label>质检状态</label><select><option>全部</option><option>未质检</option><option>质检中</option><option>已质检</option><option>已修正</option></select></div>
+<div class="field"><label>新标签</label><select><option>请选择新标签</option></select></div>
+<div class="field"><label>队列</label><select><option>请选择队列</option></select></div>
+<div class="field"><label>机构</label><select><option>请选择机构</option></select></div>
+<div class="field"><label>小组</label><select><option>请选择小组</option></select></div>
+<div class="field"><label>催员</label><select><option>请选择催员</option></select></div>
+<div class="field"><label>修改人</label><input placeholder="请输入修改人"/></div>
+<div class="field"><label>标签维度<span class="ph1">一期</span></label><select id="fDim"><option value="">全部</option><option value="L1 内容有效性">L1 内容有效性</option><option value="L2 催收相关性">L2 催收相关性</option><option value="L3 违规行为">L3 违规行为</option><option value="线路状态">线路状态</option></select></div>
+<div class="field"><label>置信度<span class="ph1">一期</span></label><select id="fConf"><option value="">全部</option><option value="确定">确定</option><option value="疑似">疑似（建议复核）</option></select></div>
+<div class="field"><label>暴力档位<span class="ph1">一期</span></label><select id="fTier"><option value="">全部</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="不告警">不告警</option></select></div>
+<div class="field"><label>挂断方<span class="ph1">一期</span></label><select><option>全部</option><option>用户</option><option>催员</option><option>系统</option><option>未知</option></select></div>
+<div class="field"><label>案件编号<span class="ph1">一期</span></label><input id="fCase" placeholder="请输入案件号"/></div>
+<div class="field"><label>请求ID<span class="ph1">一期</span></label><input id="fReq" placeholder="请输入请求ID"/></div>
+<div class="field"><label>消息编号<span class="ph1">一期</span></label><input id="fMsg" placeholder="WA/短信消息编号"/></div>
+</div>
+<div class="actions"><button class="btn primary" id="btnSearch">查询</button><button class="btn" id="btnReset">重置</button><button class="btn">批量复核</button><button class="btn">批量导出</button><button class="btn" id="btnVer">评测与版本 <span class="ph2">后续</span></button>
+<div class="toggle"><button class="active" data-mode="rec">逐条记录</button><button data-mode="case">按案件当天查看 <span class="ph2">后续</span></button></div></div>
+<div class="card"><div class="card-h"><h2>质检明细 <span class="note" id="cnt"></span></h2><style>.ov{display:flex;gap:10px;margin:0 14px;flex:1;font-size:12px}.ovb{position:relative;border:1px solid var(--line);border-radius:6px;padding:3px 10px;background:#fff;cursor:default;white-space:nowrap}.ovb b{font-size:14px;margin-left:4px}.ovb .tip{display:none;position:absolute;top:100%;left:0;margin-top:4px;z-index:9;background:#333;color:#fff;border-radius:6px;padding:8px 10px;line-height:1.7;white-space:normal;width:230px;font-size:12px}.ovb:hover .tip{display:block}</style><div class="ov"><div class="ovb" style="border-color:#f5b5b5">违规（确定）<b style="color:#d9534f">XX 条 · XX%</b><span class="ph1">一期</span><div class="tip">拆分（占位）<br>暴力类：XX 条<br>欺诈/私收款类：XX 条<br><span style="color:#bbb">同一条可同时属于两类，故两类之和可能大于总数</span></div></div><div class="ovb" style="border-color:#f3d19e">疑似违规（待复核）<b style="color:#e6a23c">YY 条 · YY%</b><div class="tip">疑似原因分布（占位）<br>缺白名单：XX 条<br>法律后果真实性待核实：XX 条<br>文本截断/语义模糊：XX 条</div></div><div class="ovb">无违规<b>ZZ 条</b></div><div class="ovb">IN 信息片段<b>WW 条</b></div></div><span class="note">置信度按行级规则：至少有一个违规行为为“确定”即为确定；“疑似”建议人工复核；证据在详情中查看；暴力显示“行为 · 档位”</span></div>
+<div id="recWrap"><table class="rows"><thead><tr><th style="width:34px">□</th><th style="width:50px">序号</th><th style="width:120px">案件编号</th><th style="width:130px">催员登录ID</th><th style="width:80px">渠道类型</th><th style="width:230px">质检内容</th><th style="width:150px">上送质检时间</th><th style="width:150px">质检完成时间</th><th style="width:84px">质检状态</th><th style="width:270px">识别标签<span class="ph1">一期</span></th><th style="width:120px">置信度<span class="ph1">一期</span></th><th style="width:110px">新标签</th><th style="width:70px">操作</th></tr></thead><tbody id="tb"></tbody></table></div>
+<div id="caseWrap" style="display:none"><table class="rows"><thead><tr><th>案件编号</th><th>日期</th><th>消息数</th><th>催员</th><th>风险概览</th><th>操作</th></tr></thead><tbody><tr><td><b>948209</b></td><td>2026-09-15</td><td>6 条</td><td>BRT-JSTS1B002</td><td><span class="pill p-orange">威胁公开曝光 · B档 4 条</span><span class="pill p-orange">虚构法律后果 · C档 1 条</span></td><td><span class="link">查看当天详情</span></td></tr><tr><td><b>951019</b></td><td>2026-09-15</td><td>3 条</td><td>BRT-JSTS1A001</td><td><span class="pill p-green">未发现违规 3 条</span></td><td><span class="link">查看当天详情</span></td></tr></tbody></table><div class="note" style="padding:10px">案件聚合视图为后续迭代；一期保持逐条质检，在详情页内提供同案件上下文。</div></div></div>
+</section>
+
+<!-- ========== 规则配置 ========== -->
+<section class="view" id="cfg">
+<div class="card"><div class="card-h"><h2>质检规则设置</h2><span class="note">甲方：BRT</span></div>
+<div class="tabs2" id="cfgTabs"><div class="active" data-p="p1">敏感词配置（发送前）</div><div data-p="p2">白名单配置（链接 / 号码 / 账号）<span class="phq">待定</span></div><div data-p="p3">暴力行为档位配置<span class="ph1">一期</span></div><div data-p="p4">配置变更记录<span class="ph1">一期</span></div></div>
+<div class="pane active" id="p1"><div class="hint">匹配规则：整词/整词组匹配，不区分大小写。敏感词在发送前执行，命中即拦截，只进“发送拦截明细”，不进 AI 质检的暴力统计。</div>
+<table class="rows"><thead><tr><th>大类</th><th>小类</th><th>词条数</th><th>来源</th><th>状态</th></tr></thead><tbody><tr><td>暴力催收</td><td>辱骂</td><td>86</td><td><span class="pill p-gray">系统维护</span></td><td>启用</td></tr><tr><td>暴力催收</td><td>人身威胁</td><td>42</td><td><span class="pill p-gray">系统维护</span></td><td>启用</td></tr><tr><td>甲方自定义</td><td>本地化话术</td><td>7</td><td><span class="pill p-blue">甲方自定义</span> <span class="phq">待定</span></td><td>启用</td></tr></tbody></table><div class="note" style="margin-top:8px">“系统词 / 甲方自定义词”拆分是否一期做，待产品侧评估工作量。</div></div>
+<div class="pane" id="p2"><div class="hint">现网仅有链接白名单。设想扩展到：收款账号 / 还款码、联系电话、WhatsApp 账号。具体需要哪几类，待你们确认。</div>
+<table class="rows"><thead><tr><th>类型</th><th>名称</th><th>内容</th><th>匹配方式</th><th>备注</th><th>适用渠道</th></tr></thead><tbody><tr><td>链接</td><td>官方平台</td><td>https://pay.example.com</td><td>精确匹配</td><td>—</td><td>短信 / WA</td></tr><tr><td>号码 <span class="phq">待定</span></td><td>官方客服电话</td><td>+52 55 0000 0000</td><td>精确匹配</td><td>—</td><td>短信 / WA / 电话</td></tr><tr><td>WA账号 <span class="phq">待定</span></td><td>官方WA</td><td>+52 55 1111 1111</td><td>精确匹配</td><td>—</td><td>WA</td></tr></tbody></table></div>
+<div class="pane" id="p3"><div class="hint">AI 只识别“具体是哪种行为”并给出证据；档位由这里的配置映射。每个性质都可配“不告警 / A / B / C”。判定标准和数值阈值（如 60 分钟）不开放。修改仅对之后的识别生效，历史记录不变。</div>
+<table class="rows"><thead><tr><th style="width:90px">默认档位</th><th style="width:100px">侵害性质</th><th>具体行为</th><th style="width:180px">本甲方档位</th></tr></thead><tbody id="tierBody"></tbody></table>
+<div class="warn">待讨论：严重行为（如“威胁伤害/杀害”）能否选“不告警”？至少应保留记录与证据。</div>
+<button class="btn primary" id="saveCfg">保存配置</button><span class="note" id="saveTip" style="margin-left:10px"></span></div>
+<div class="pane" id="p4"><div class="hint">记录甲方对配置的每次修改：谁、何时、改了哪项、改前改后。配置修改权限由产品侧定义。</div>
+<table class="rows"><thead><tr><th>时间</th><th>操作人</th><th>配置项</th><th>修改前</th><th>修改后</th><th>配置版本</th></tr></thead><tbody id="logBody"><tr><td>2026-09-20 11:02</td><td>GUANLIYUAN</td><td>暴力行为档位 · 虚构法律后果</td><td>C档</td><td>B档</td><td>cfg-0003</td></tr><tr><td>2026-09-18 16:40</td><td>GUANLIYUAN</td><td>白名单 · 链接 · 官方平台</td><td>—</td><td>新增</td><td>cfg-0002</td></tr></tbody></table></div>
+</div></section>
+
+<!-- ========== 拦截明细 ========== -->
+<section class="view" id="block"><div class="card"><div class="card-h"><h2>发送拦截明细 <span class="note">发送前规则层（敏感词 / 链接 / 还款码）</span></h2></div>
+<div class="hint" style="margin:12px">口径设想：被敏感词实时拦截的消息未发出，只在此页查看，不计入 AI 质检的暴力统计；AI 质检只看已发出的内容。</div>
+<table class="rows"><thead><tr><th>渠道</th><th>命中类型</th><th>处理方式</th><th>命中对象</th><th>消息内容</th><th>发送时间</th></tr></thead><tbody><tr><td>短信</td><td><span class="pill p-orange">敏感词</span></td><td>实时拦截</td><td><span class="pill p-orange">曝光</span></td><td class="content">Si no pagas te vamos a exponer…</td><td>2026-09-15 20:10:02</td></tr><tr><td>WA</td><td><span class="pill p-purple">链接</span></td><td>标记异常</td><td>http://x.example/pay</td><td class="content">Paga aquí: http://x.example/pay</td><td>2026-09-15 19:40:11</td></tr></tbody></table></div></section>
+
+<!-- ========== 详情抽屉 ========== -->
+<div class="mask" id="dMask"><aside class="drawer">
+<div class="drawer-h"><span id="dHead">复核详情</span><button class="close" id="dClose">×</button></div>
+<div class="grid2"><section class="dcard" id="dLeft"></section>
+<aside class="dcard"><div class="dtitle">质检结论 <span class="note">汇总标签 + 各维度明细（证据、确定/疑似）</span></div><div id="dRight"></div>
+<div class="revbox"><b>人工复核</b><div class="note">可对多个标签分别复核；结果回流评测集</div>
+<div class="ropts" id="ropts"><button data-r="确认命中">确认命中</button><button data-r="误判">误判</button><button data-r="改标">改标</button><button data-r="无法判断">无法判断</button></div>
+<div class="relabel" id="relabel"><div class="note">先选维度，再选标签（可多选）</div><select id="rlDim"></select><div id="rlLabels" style="margin-top:6px"></div></div>
+<textarea placeholder="复核原因（必填）"></textarea><button class="btn primary" style="width:100%;margin-top:8px" id="rvSubmit">提交复核</button><div class="toast" id="toast">已模拟提交：状态更新为“已修正”，结果回流评测集。</div></div></aside></div>
+</aside></div>
+
+<!-- ========== 评测与版本 ========== -->
+<div class="mask" id="vMask"><aside class="drawer"><div class="drawer-h"><span>评测与版本 <span class="ph2">后续</span></span><button class="close" id="vClose">×</button></div>
+<div class="sample"><span class="sample-badge">示例数据 · 非真实评测结果</span><div class="note">当前尚无可用金标评测集（需待双声道上线并积累复核样本）。本面板为二期设想，数字仅示意版式。</div>
+<div class="metric-grid"><div class="metric"><b>—</b><small>总体准确率</small></div><div class="metric"><b>—</b><small>风险标签召回率</small></div><div class="metric"><b>—</b><small>风险标签误检率</small></div><div class="metric"><b>—</b><small>未覆盖/无法判断样本</small></div></div>
+<table class="rows"><thead><tr><th>标签</th><th>金标样本</th><th>上一版准确率</th><th>本版准确率</th><th>本版召回率</th></tr></thead><tbody><tr><td>威胁公开曝光</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>虚构法律后果</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>VALID / IN / BB / BH</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table>
+<div class="note" style="margin-top:10px">同版本同话术结果需一致；复核样本沉淀评测集后，才展示版本回归对比。</div></div></aside></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const BEH=[['A','人身安全','威胁伤害/杀害'],['A','人格尊严','侮辱辱骂'],['A','人格尊严','性骚扰'],['B','名誉','威胁公开曝光'],['B','隐私','威胁通知全部联系人'],['B','隐私','向第三方转达/透露债务'],['B','现实接触','定位/上门威胁'],['B','隐私','社媒追踪'],['C','虚假法律','虚构法律后果'],['C','欺诈指控','指控客户欺诈'],['C','信息泄露','模糊信息处置威胁'],['C','施压','限时施压'],['C','施压','模糊后果暗示']];
+const cfg={};BEH.forEach(b=>cfg[b[2]]=b[0]);
+const tcls={A:'p-red',B:'p-orange',C:'p-blue','不告警':'p-gray'};
+// 记录：labels 每项 {dim,name,conf,ev,beh?,tier?,why?}
+const D0=[
+{id:'REQ-268232',msg:'SMS-8830012',cs:'948209',co:'BRT-JSTS1B002',ch:'sms',t:'20:33:04',old:'BD-暴力催收',c:'Tienes 10 minutos para realizar tu pago o se procede con el boletinaje de tu foto en redes sociales.',L:[{dim:'L1',name:'VALID 有效',conf:'确定',ev:'催员侧文本完整'},{dim:'L2',name:'催收相关',conf:'确定',ev:'含“pago”还款要素'},{dim:'L3',beh:'威胁公开曝光',tier:'B',conf:'确定',ev:'“boletinaje de tu foto en redes sociales”'},{dim:'L3',beh:'限时施压',tier:'C',conf:'确定',ev:'“10 minutos”（≤60分钟且配合后果）'}]},
+{id:'REQ-268235',msg:'SMS-8830015',cs:'946298',co:'BRT-JSTS1B002',ch:'sms',t:'20:32:26',old:'BA-质检通过',c:'Ya enfrentas riesgos legales por fraude, debes pagar ahora mismo.',L:[{dim:'L1',name:'VALID 有效',conf:'确定',ev:''},{dim:'L2',name:'催收相关',conf:'确定',ev:'“pagar”'},{dim:'L3',beh:'指控客户欺诈',tier:'C',conf:'疑似',ev:'“riesgos legales por fraude”',why:'疑似原因：证据语义偏模糊，建议人工复核'}]},
+{id:'REQ-269180',msg:'SMS-8831001',cs:'951019',co:'BRT-JSTS1A001',ch:'sms',t:'19:56:41',old:'BA-质检通过',c:'Su deuda vence hoy, aun no registramos su pago. Si ya pagó, envíe el comprobante.',L:[{dim:'L1',name:'VALID 有效',conf:'确定',ev:''},{dim:'L2',name:'催收相关',conf:'确定',ev:'“deuda”“pago”'},{dim:'L3',name:'无违规',conf:'确定',ev:''}]},
+{id:'REQ-276917',msg:'SMS-8832007',cs:'934948',co:'BRT-JSTS2003',ch:'sms',t:'18:32:25',old:'BC-催收无关-有内容',c:'Bretton Prestamos 1633',L:[{dim:'L1',name:'IN 信息片段',conf:'确定',ev:'仅名称+数字，无法判断'}]},
+{id:'REQ-278470',msg:'WA-5521993',cs:'939402',co:'BRT-AZJSTS1B001',ch:'wa',t:'17:50:30',old:'BA-质检通过',c:'Por favor transmite a tu contacto de emergencia que pague tu deuda hoy.',L:[{dim:'L1',name:'VALID 有效',conf:'确定',ev:''},{dim:'L2',name:'催收相关',conf:'确定',ev:'“deuda”'},{dim:'L3',beh:'向第三方转达/透露债务',tier:'B',conf:'疑似',ev:'“contacto de emergencia”',why:'疑似原因：缺少白名单，无法确认该联系人是否为本人授权号码'}]},
+{id:'REQ-278471',msg:'WA-5521994',cs:'939402',co:'BRT-AZJSTS1B001',ch:'wa',t:'17:52:10',old:'BA-质检通过',c:'Codigo de Reembolso: 684180076013760636. Monto: 1755.',L:[{dim:'L1',name:'VALID 有效',conf:'确定',ev:''},{dim:'L2',name:'催收相关',conf:'确定',ev:''},{dim:'L3',name:'无违规',conf:'确定',ev:''}]},
+{id:'REQ-278461',msg:'CALL-e8d0905',cs:'827107',co:'BRT-JSTS2003',ch:'phone',t:'18:18:57',old:'BA-质检通过',c:'（电话）Si no paga hoy, publicaremos su foto en redes sociales.',hang:'用户',cs2:'NORMAL',L:[{dim:'L1',name:'VALID 有效',conf:'确定',ev:''},{dim:'L2',name:'催收相关',conf:'确定',ev:''},{dim:'L3',beh:'威胁公开曝光',tier:'B',conf:'疑似',ev:'00:17–00:24 “publicaremos su foto en redes sociales”',why:'疑似原因：语音未做声道/说话人分离（历史录音），无法确认该句出自催员'},{dim:'CS',name:'NORMAL',conf:'确定',ev:'有真人有效交互'}]},
+{id:'REQ-278462',msg:'CALL-a19c3b1',cs:'942404',co:'BRT-JSTS2003',ch:'phone',t:'17:40:12',old:'N-未知意图',c:'（电话）全程仅有环境噪音',hang:'催员',cs2:'M',L:[{dim:'CS',name:'M 全程静音',conf:'疑似',ev:'整通无人声',why:'疑似原因：无声道分离，无法确认是用户静音还是录音缺失'}]}
+];
+
+const V1={dim:'L1',name:'VALID 有效',conf:'确定',ev:''},V2={dim:'L2',name:'催收相关',conf:'确定',ev:'«pago»'},NV={dim:'L3',name:'无违规',conf:'确定',ev:''};
+const D1=[
+{id:'REQ-278480',msg:'SMS-8833001',cs:'1028639',co:'BRT-JSTS1A002',ch:'sms',t:'22:18:52',old:'BA-质检通过',c:'ULTIMA ADVERTENCIA: paga hoy o procederemos con la visita a tu domicilio.',L:[V1,V2,{dim:'L3',beh:'定位/上门威胁',tier:'B',conf:'确定',ev:'“visita a tu domicilio”'}]},
+{id:'REQ-278481',msg:'SMS-8833002',cs:'1028639',co:'BRT-JSTS1A002',ch:'sms',t:'22:18:45',old:'BA-质检通过',c:'Nombre del cliente: GAYTAN. Su pago vence hoy.',L:[V1,V2,NV]},
+{id:'REQ-278482',msg:'SMS-8833003',cs:'1086024',co:'BRT-JSTS1A002',ch:'sms',t:'22:17:28',old:'BA-质检通过',st:'已修正',nl:'L3 无违规',c:'TIENES QUE PAGAR YA, no te hagas el tonto.',L:[V1,V2,{dim:'L3',beh:'侮辱辱骂',tier:'A',conf:'疑似',ev:'“no te hagas el tonto”',why:'疑似原因：语气强硬，是否构成人格贬损需人工判断'}]},
+{id:'REQ-278483',msg:'SMS-8833004',cs:'1086024',co:'BRT-JSTS1A002',ch:'sms',t:'22:17:16',old:'BD-暴力催收',c:'Se enviará a tus contactos que no pagas tus deudas.',L:[V1,V2,{dim:'L3',beh:'威胁通知全部联系人',tier:'B',conf:'确定',ev:'“Se enviará a tus contactos”'}]},
+{id:'REQ-278484',msg:'WA-5521995',cs:'956150',co:'BRT-ZSTS0003',ch:'wa',t:'21:28:35',old:'BA-质检通过',c:'Si no pagas hoy, tomaremos medidas adicionales.',L:[V1,V2,{dim:'L3',beh:'模糊后果暗示',tier:'C',conf:'确定',ev:'“tomaremos medidas adicionales”'}]},
+{id:'REQ-278485',msg:'CALL-77b2e10',cs:'1086024',co:'BRT-JSTS1A002',ch:'phone',t:'21:10:03',old:'N-未知意图',c:'（电话）用户答非所问',hang:'催员',cs2:'R',L:[{dim:'CS',name:'R 无关应答',conf:'疑似',ev:'用户答非所问，催员多次澄清仍无有效表达',why:'疑似原因：无声道分离，无法确认应答方'}]},
+{id:'REQ-278490',msg:'CALL-0138560',cs:'1038000',co:'BRT-ZSTNEWS0002',ch:'phone',t:'01:38:56',old:'-',st:'质检中',c:'（电话）等待质检结果',L:[]}
+];
+const D=D0.concat(D1).map(x=>Object.assign({st:'已质检'},x));
+function tp1(t){const [h,m,sec]=t.split(':').map(Number);const u=h*3600+m*60+sec+1;const f=n=>String(n).padStart(2,'0');return f(Math.floor(u/3600))+':'+f(Math.floor(u%3600/60))+':'+f(u%60)}
+function chip(l){if(l.beh){const t=cfg[l.beh]&&l.tier!==undefined?l.tier:l.tier;return `<span class="pill ${tcls[l.tier]} ">${l.beh} · ${l.tier}档</span>`}
+const c=/VALID|无违规|NORMAL|催收相关/.test(l.name)?'p-green':'p-gray';return `<span class="pill ${c} ">${l.name}</span>`}
+function isLow(x){const v=x.L.filter(l=>l.beh);if(v.length)return !v.some(l=>l.conf==='确定');return x.L.some(l=>l.conf==='疑似')}
+function show(l){return !(l.dim==='L1'&&l.name.startsWith('VALID'))&&!(l.dim==='L2')&&l.name!=='无违规'&&!(l.dim==='CS'&&l.name==='NORMAL')}
+function render(){const ch=$('fCh').value,cf=$('fConf').value,tr=$('fTier').value,cs=$('fCase').value.trim(),rq=$('fReq').value.trim(),mg=$('fMsg').value.trim(),dm=$('fDim').value;
+const dmap={'L1 内容有效性':'L1','L2 催收相关性':'L2','L3 违规行为':'L3','线路状态':'CS'};
+const d=D.filter(x=>(!ch||x.ch===ch)&&(!cs||x.cs.includes(cs))&&(!rq||x.id.includes(rq))&&(!mg||x.msg.toLowerCase().includes(mg.toLowerCase()))&&(!cf||(x.L.length&&(cf==='疑似')===isLow(x)))&&(!tr||x.L.some(l=>l.tier===tr))&&(!dm||x.L.some(l=>l.dim===dmap[dm])));
+$('cnt').textContent=d.length+' 条';
+$('tb').innerHTML=d.length?d.map((x,i)=>{const low=isLow(x);const shown=x.L.filter(show);const ev=x.L.find(l=>l.ev&&show(l));const chn={sms:'短信',wa:'WhatsApp',phone:'电话'}[x.ch];
+const cont=x.ch==='phone'?'<span class="link" onclick="openD(\''+x.id+'\')">播放录音</span>':x.ch==='wa'?x.c.slice(0,26)+'… <span class="link" onclick="openD(\''+x.id+'\',true)">查看原对话（定位本条）</span>':x.c;
+return `<tr style="${low?'background:#fffdf5':''}"><td>□</td><td>${i+1}</td><td><b>${x.cs}</b><div class="note">${x.id}<br>${x.msg}</div></td><td>${x.co}</td><td><span class="pill p-blue">${chn}</span></td><td class="content ${x.ch==='wa'?'wrap':''}" title="${x.c}">${cont}</td><td>2026-09-15 ${x.t}</td><td>${x.st==='质检中'?'-':'2026-09-15 '+tp1(x.t)}</td><td><span class="pill ${x.st==='质检中'?'p-orange':x.st==='已修正'?'p-blue':'p-green'}">${x.st}</span></td><td>${x.L.length?(shown.length?shown:x.L.slice(0,1)).map(chip).join(''):'-'}${x.hang?`<div class="note">挂断方：${x.hang}</div>`:''}</td><td>${!x.L.length?'-':low?'<span class="pill p-orange">疑似 · 建议复核</span>':'<span class="pill p-green">确定</span>'}</td><td>${x.nl?'<span class="pill p-blue">'+x.nl+'</span>':'-'}</td><td>${x.st==='质检中'?'-':`<span class="link" onclick="openD('${x.id}')">复核</span>`}</td></tr>`}).join(''):'<tr><td colspan="10" style="text-align:center;padding:30px;color:#999">没有匹配记录</td></tr>';}
+function labBlock(l){const name=l.beh?`${l.beh} → ${l.tier}档（按甲方配置）`:l.name;return `<div class="lab"><div class="h"><b>${name}</b><span class="pill ${l.conf==='疑似'?'p-orange p-doubt':'p-green'}">${l.conf}</span></div><div class="note">维度：${{L1:'L1 内容有效性',L2:'L2 催收相关性',L3:'L3 违规行为',CS:'线路状态'}[l.dim]}</div>${l.ev?`<div class="ev">证据：${l.ev}</div>`:''}${l.why?`<div class="why">${l.why}</div>`:''}</div>`}
+const TR={"Su deuda vence hoy.": "您的债务今日到期。", "Tienes 10 minutos para realizar tu pago o se procede con el boletinaje de tu foto en redes sociales.": "请在10分钟内付款，否则将把你的照片公开到社交媒体。", "Ya enfrentas riesgos legales por fraude, debes pagar ahora mismo.": "你正面临欺诈相关法律风险，必须立刻付款。", "Su deuda vence hoy, aun no registramos su pago. Si ya pagó, envíe el comprobante.": "您的债务今日到期，我们尚未收到您的付款。如已付款，请发送凭证。", "Bretton Prestamos 1633": "品牌名加数字，无完整语义（信息片段）。", "Por favor transmite a tu contacto de emergencia que pague tu deuda hoy.": "请转告你的紧急联系人，让他今天替你还清债务。", "Codigo de Reembolso: 684180076013760636. Monto: 1755.": "还款码：684180076013760636。金额：1755。", "ULTIMA ADVERTENCIA: paga hoy o procederemos con la visita a tu domicilio.": "最后警告：今天付款，否则我们将上门拜访。", "Nombre del cliente: GAYTAN. Su pago vence hoy.": "客户姓名：GAYTAN。您的还款今日到期。", "TIENES QUE PAGAR YA, no te hagas el tonto.": "你必须马上付款，别装傻。", "Se enviará a tus contactos que no pagas tus deudas.": "将会通知你的联系人，说你不还债。", "Si no pagas hoy, tomaremos medidas adicionales.": "如果你今天不付款，我们将采取进一步措施。", "Hola, ¿cuándo puede pagar?": "您好，您什么时候可以付款？", "No puedo hoy, estoy trabajando.": "我今天不行，我在工作。", "¿Por qué le dicen a mi contacto?": "为什么要告诉我的联系人？", "Su pago está vencido. Necesitamos que pague hoy.": "您的付款已逾期。我们需要您今天付款。", "No tengo dinero ahora. ¿Puedo pagar mañana?": "我现在没有钱。我可以明天付款吗？", "Si no paga hoy, publicaremos su foto en redes sociales.": "如果您今天不付款，我们会将您的照片发布到社交媒体。"};
+let transOn=true;
+function applyTrans(){const L=$("dLeft");L.classList.toggle("trans-on",transOn);L.querySelectorAll("#trToggle button").forEach(b=>b.classList.toggle("active",(b.dataset.t==="1")===transOn))}
+function buildTrans(){const L=$("dLeft");L.querySelectorAll(".msg,.speech").forEach(el=>{const c=el.cloneNode(true);c.querySelectorAll(".meta,.tr").forEach(m=>m.remove());const t=c.textContent.trim();const z=TR[t];if(z)el.insertAdjacentHTML("beforeend","<div class=\"tr\">译文："+z+"</div>")});const tt=L.querySelector(".dtitle");tt.insertAdjacentHTML("beforeend","<span class=\"toggle\" id=\"trToggle\" style=\"margin-left:8px\"><button data-t=\"0\">原文</button><button data-t=\"1\">原文 / 译文</button></span>");L.querySelectorAll("#trToggle button").forEach(b=>b.onclick=()=>{transOn=b.dataset.t==="1";applyTrans()});applyTrans()}
+function openD(id,ctx){const x=D.find(z=>z.id===id);$('dMask').classList.add('open');$('toast').style.display='none';
+$('dHead').textContent={sms:'短信复核详情',wa:'WhatsApp 复核详情',phone:'电话语音复核详情'}[x.ch];
+let left='';
+if(x.ch==='sms'){left=`<div class="dtitle">案件 ${x.cs} · 同案件当天上下文 <span class="note">一期：逐条质检，此处仅展示上下文</span></div><div class="msg"><div class="meta">20:24:10 · 催员</div>Su deuda vence hoy.</div><div class="msg target"><div class="meta">${x.t} · 催员 · 本条（${x.msg}）</div>${x.c.replace(/(boletinaje de tu foto[^.]*|riesgos legales por fraude)/,'<span class="hit">$1</span>')}</div><div class="note" style="padding:8px 16px">注：短信用户回复是否可取，待确认；取不到时仅展示同案件当天发送记录。</div>`}
+if(x.ch==='wa'){left=`<div class="dtitle">WhatsApp 原对话（定位到本条） <span style="display:flex;gap:6px"><input id="wsearch" placeholder="按消息编号搜索" style="height:28px;border:1px solid #dcdfe6;border-radius:6px;padding:0 8px" value="${x.msg}"/><button class="btn sm">搜索</button></span></div><div class="ctxmore">↑ 加载更早的消息（超出质检批次）</div><div class="msg"><div class="meta">17:41:02 · 催员 · WA-5521980</div>Hola, ¿cuándo puede pagar?</div><div class="msg user"><div class="meta">17:45:30 · 用户</div>No puedo hoy, estoy trabajando.</div><div class="msg target"><div class="meta">${x.t} · 催员 · 本条（${x.msg}）</div>${x.c.replace(/(contacto de emergencia)/,'<span class="hit">$1</span>')}</div><div class="msg user"><div class="meta">17:58:12 · 用户</div>¿Por qué le dicen a mi contacto?</div><div class="ctxmore">↓ 加载更晚的消息</div>`}
+if(x.ch==='phone'){left=`<div class="dtitle">通话录音 <span class="note">Call ${x.msg}</span></div><div class="audio"><div class="play">▶</div><span>00:14 / 00:41</span><div class="bar"><i></i></div></div>`+(x.cs2==='M'?`<div class="sysev">系统事件：整通 41 秒未检测到人声</div>`:`<div class="turn"><div class="role c">催员 · 00:03</div><div class="speech">Su pago está vencido. Necesitamos que pague hoy.</div></div><div class="turn"><div class="role u">用户 · 00:10</div><div class="speech">No tengo dinero ahora. ¿Puedo pagar mañana?</div></div><div class="turn"><div class="role c">催员 · 00:17</div><div class="speech">Si no paga hoy, <span class="hit">publicaremos su foto en redes sociales</span>.</div></div><div class="sysev">系统事件：00:35 检测到 6 秒静音（非对话角色）</div>`)+`<div class="warn" style="margin:12px 16px">角色拆分依赖双声道（一期必须交付）。历史录音无法区分说话人，相关结论均标“疑似”。</div>`}
+$('dLeft').innerHTML=left;buildTrans();
+let r=x.L.map(labBlock).join('');
+if(x.ch==='phone')r=`<div class="kv"><b>挂断方（一期必须记录）</b>${x.hang}</div>`+r;
+if(x.L.length){const sh=x.L.filter(show);const low=isLow(x);
+const sum=`<div class="kv" style="background:#f8fbff"><b>识别标签（与列表一致）</b><div>${(sh.length?sh:x.L.slice(0,1)).map(chip).join('')}</div><div style="margin-top:6px">置信度：${low?'<span class="pill p-orange">疑似 · 建议复核</span>':'<span class="pill p-green">确定</span>'}</div>${x.st==='已修正'?`<div class="note" style="margin-top:6px">已人工修正：${x.nl||''}</div>`:''}</div><div class="note" style="padding:8px 16px 0">各维度明细与证据：</div>`;
+r=sum+r;}
+if(!x.L.length)r='<div class="kv">质检中，暂无结果</div>';$('dRight').innerHTML=r;
+$('ropts').querySelectorAll('button').forEach(b=>b.classList.remove('active'));$('relabel').style.display='none';}
+// 复核交互
+const DIMS={'L1 内容有效性':['VALID','IN','BB','BH'],'L2 催收相关性':['催收相关','BC 无关'],'L3 违规行为':['无违规'].concat(BEH.map(b=>b[2])),'线路状态':['NORMAL','I','J','L','M','R']};
+$('rlDim').innerHTML=Object.keys(DIMS).map(k=>`<option>${k}</option>`).join('');
+function fillRl(){$('rlLabels').innerHTML=DIMS[$('rlDim').value].map(n=>`<label style="display:inline-block;margin:3px 10px 3px 0"><input type="checkbox"> ${n}</label>`).join('')}
+$('rlDim').onchange=fillRl;fillRl();
+$('ropts').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('ropts').querySelectorAll('button').forEach(z=>z.classList.remove('active'));b.classList.add('active');$('relabel').style.display=b.dataset.r==='改标'?'block':'none'});
+$('rvSubmit').onclick=()=>$('toast').style.display='block';
+$('dClose').onclick=()=>$('dMask').classList.remove('open');$('dMask').onclick=e=>{if(e.target.id==='dMask')$('dMask').classList.remove('open')};
+// 配置页
+function renderTier(){$('tierBody').innerHTML=BEH.map(b=>`<tr><td><span class="pill ${tcls[b[0]]}">${b[0]}</span></td><td>${b[1]}</td><td>${b[2]}</td><td><select class="tier" data-b="${b[2]}">${['不告警','A','B','C'].map(t=>`<option ${cfg[b[2]]===t?'selected':''}>${t}</option>`).join('')}</select></td></tr>`).join('')}
+renderTier();
+$('saveCfg').onclick=()=>{const ch=[];document.querySelectorAll('select.tier').forEach(s=>{if(cfg[s.dataset.b]!==s.value){ch.push([s.dataset.b,cfg[s.dataset.b],s.value]);cfg[s.dataset.b]=s.value}});
+if(!ch.length){$('saveTip').textContent='没有修改';return}
+const v='cfg-'+String(4+Math.floor(Math.random()*90)).padStart(4,'0');
+$('logBody').innerHTML=ch.map(c=>`<tr><td>刚刚</td><td>GUANLIYUAN</td><td>暴力行为档位 · ${c[0]}</td><td>${c[1]}档</td><td>${c[2]}档</td><td>${v}</td></tr>`).join('')+$('logBody').innerHTML;
+$('saveTip').textContent='已保存：仅对之后的识别生效，历史记录的档位不变；已写入“配置变更记录”。'};
+document.querySelectorAll('#cfgTabs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('#cfgTabs div').forEach(z=>z.classList.toggle('active',z===t));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.id===t.dataset.p))});
+// 导航
+document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>{document.querySelectorAll('.nav').forEach(z=>z.classList.toggle('active',z===n));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===n.dataset.v))});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-mode]').forEach(z=>z.classList.toggle('active',z===b));$('recWrap').style.display=b.dataset.mode==='rec'?'block':'none';$('caseWrap').style.display=b.dataset.mode==='case'?'block':'none'});
+$('btnSearch').onclick=render;$('btnReset').onclick=()=>{['fCh','fConf','fTier','fDim'].forEach(i=>$(i).value='');['fCase','fReq','fMsg'].forEach(i=>$(i).value='');render()};
+$('btnVer').onclick=()=>$('vMask').classList.add('open');$('vClose').onclick=()=>$('vMask').classList.remove('open');$('vMask').onclick=e=>{if(e.target.id==='vMask')$('vMask').classList.remove('open')};
+render();
+</script>
+</body>
+</html>

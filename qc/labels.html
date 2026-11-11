@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"><title>新旧标签对比 testset_400</title>
+<style>
+:root{color-scheme:light}body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#f6f7f9;color:#222;margin:0;padding:24px;max-width:1100px;margin:auto}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:0 0 12px}.sub{color:#666;font-size:13px;margin-bottom:20px}
+.card{background:#fff;border-radius:10px;padding:18px 20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.kpi{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}.kpi b{font-size:26px;display:block}.kpi span{font-size:12px;color:#666}
+.row{display:flex;align-items:center;margin:7px 0;font-size:13px}.lbl{width:130px;flex:none}.bar{display:flex;flex:1;height:24px;border-radius:4px;overflow:hidden;background:#eee}.bar div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;white-space:nowrap;overflow:hidden}.tot{width:44px;flex:none;padding-left:6px;text-align:right;color:#666}
+.legend{font-size:12px;margin-top:10px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.note{font-size:12px;color:#777;margin-top:8px}
+.find{font-size:13px;line-height:1.7}.find p{margin:6px 0}.tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:12px;color:#fff;margin-right:4px}
+</style></head><body>
+<h1>新旧标签对比 · testset_400（短信/WA，墨西哥西语为主）</h1>
+<div class="sub">新标签按 v1.3 由 AI 打标（非金标），171 条去重话术 → 400 行；同话术同标签一致性检查 0 冲突</div>
+<div class="card"><h2>打标概览（400 行）</h2><div id="ov"></div><div class="legend" id="ovlg"></div></div>
+<div class="kpis">
+<div class="kpi"><b style="color:#d9534f">43 + 15</b><span>老 BA 中确定违规 43（33%）＋疑似 15</span></div>
+<div class="kpi"><b style="color:#f0ad4e">1 / 115</b><span>老 BC 在新体系中仍为 BC</span></div>
+<div class="kpi"><b style="color:#5b6abf">6 / 7</b><span>老 N 实为暴力话术</span></div>
+<div class="kpi"><b style="color:#888">85</b><span>含“疑似”标记的行（21%）：45 行整行疑似违规，其余 40 行疑似不改变行级结论</span></div>
+</div>
+<div class="card"><h2>① 老标签 → 新标签 流向</h2><div id="flow"></div><div class="legend" id="lg"></div>
+<div class="note">新标签两层：先判标签结果（有违规/BA/IN/BC），有违规的再按行级置信度拆确定/疑似（深红/浅红）</div></div>
+<div class="grid2">
+<div class="card"><h2>② 新标签分布（三层）</h2>
+<div style="font-weight:600;font-size:13px">第一层 标签结果（互斥，每行一个，合计 400）</div><div id="dist"></div>
+<div style="font-weight:600;font-size:13px;margin-top:16px">第二层 有违规的细分：最高档位（221 行）</div><div id="tier"></div>
+<div class=note>一行可命中多个行为，这里只取最高档以保持互斥；“仅欺诈”= 只命中 BG/BI 等欺诈类，无档位。各行为的命中次数见 ③。BA/IN/BC 没有第二层。</div>
+<div style="font-weight:600;font-size:13px;margin-top:16px">第三层 置信度（仅有违规，221 行）</div><div id="conf"></div>
+<div class=note>行级汇总：至少一个违规行为“确定”→确定；否则→疑似。违规率只算确定：176/400=44%；疑似 45 行单独展示（其中 8 行仅欺诈疑似）。明细里每个标签各自带置信度（标签与置信度是两个字段）。</div></div>
+<div class="card"><h2>③ 行为命中次数（确定 / 疑似）</h2><div id="beh"></div><div class="note">社媒追踪、性骚扰 0 命中；BE/BF 0 命中——样本覆盖不到</div></div>
+</div>
+<div class="card find"><h2>④ 结论</h2>
+<p><span class="tag" style="background:#d9534f">老BA漏检</span>131 条老 BA 中 43 条确定、另 15 条疑似含公开曝光、限时施压、通知联系人等违规，老体系“无违规”结论不可信。</p>
+<p><span class="tag" style="background:#f0ad4e">老BC污染</span>115 条老 BC 中 74 条其实是催收相关、23 条是无法识别意图的碎片（新体系归 IN），12 条是确定的暴力违规、另 5 条仅欺诈疑似。</p>
+<p><span class="tag" style="background:#5b6abf">老BD无颗粒度</span>147 条 BD 全部挤在一个标签；新体系拆成 13 种行为 + A/B/C 档，甲方可按档位配置提醒。</p>
+<p><span class="tag" style="background:#888">新体系待补</span>限时无后果的边界、“出售个人信息”缺行为、白名单缺失导致 37 行欺诈疑似、法律后果真实性无法判断。</p>
+</div>
+<script>
+const C={'有违规·确定':'#d9534f','有违规·疑似':'#e8a8a6','BA':'#5cb85c','BC':'#5bc0de','IN':'#999'};
+const T={'A档':'#a61b1b','B档':'#d9534f','C档':'#f0ad4e','仅欺诈':'#9b59b6','有违规':'#d9534f','确定':'#d9534f','疑似':'#e8a8a6','BA':'#5cb85c','IN':'#999','BC':'#5bc0de'};
+const flow=[['老 BD (147)',{'有违规·确定':115,'有违规·疑似':25,'BA':7}],['老 BA (131)',{'有违规·确定':43,'有违规·疑似':15,'BA':73}],['老 BC (115)',{'有违规·确定':12,'有违规·疑似':5,'BA':74,'BC':1,'IN':23}],['老 N (7)',{'有违规·确定':6,'IN':1}]];
+function bars(el,rows,max){document.getElementById(el).innerHTML=rows.map(([l,o])=>{const t=Object.values(o).reduce((a,b)=>a+b,0);return `<div class=row><div class=lbl>${l}</div><div style="flex:1;min-width:0"><div class=bar style="width:${t/max*100}%">${Object.entries(o).map(([k,v])=>`<div title="${k} ${v}" style="width:${v/t*100}%;background:${C[k]||k}">${v/t>.06?k+' '+v:''}</div>`).join('')}</div></div><div class=tot>${t}</div></div>`}).join('')}
+const OC={'BD 暴力':'#d9534f','BA 无违规':'#5cb85c','BC 无关':'#5bc0de','N':'#999'};
+function ov(rows){return rows.map(([l,o])=>`<div class=row><div class=lbl>${l}</div><div class=bar style="height:30px">${Object.entries(o).map(([k,v])=>`<div title="${k} ${v}" style="width:${v/4}%;background:${C[k]||OC[k]}">${v>=12?k+' '+v+' ('+Math.round(v/4)+'%)':''}</div>`).join('')}</div><div class=tot>400</div></div>`).join('')}
+document.getElementById('ov').innerHTML=ov([['老标签',{'BD 暴力':147,'BA 无违规':131,'BC 无关':115,'N':7}],['新标签',{'有违规·确定':176,'有违规·疑似':45,'BA':154,'BC':1,'IN':24}]]);
+const OM={'BD 暴力':'暴力催收（不分行为/档位）','BA 无违规':'催收相关，无违规','BC 无关':'与催收无关，不质检','N':'无效/其他'};
+const NM={'有违规·确定':'有违规标签，行级置信度确定（至少一个违规行为确定，计入违规率）','有违规·疑似':'有违规标签，行级置信度疑似（无确定行为，待人工复核，不计入违规率）','BA':'催收相关，无违规','BC':'与催收无关，不质检','IN':'无法识别催收意图（碎片/裸链接/仅姓名等）'};
+const lg=(m,c)=>Object.entries(m).map(([k,t])=>`<div style="margin:3px 0"><i style="background:${c[k]}"></i><b>${k}</b>：${t}</div>`).join('');
+document.getElementById('ovlg').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1.6fr;gap:16px;margin-top:6px"><div><div style="font-weight:600">老标签图例</div>${lg(OM,OC)}</div><div><div style="font-weight:600">新标签图例</div>${lg(NM,C)}</div></div><div class=note>新标签：有违规 221（确定 176（44%）＋疑似 45（11%））；老 BD 147（37%）。BC=1 色块太窄未显示数字，鼠标悬停可看</div>`;
+bars('flow',flow,147);
+document.getElementById('lg').innerHTML=Object.entries(C).map(([k,v])=>`<i style="background:${v}"></i>${k}`).join('');
+Object.assign(C,T);
+bars('dist',[['有违规',{'有违规':221}],['BA 无违规',{'BA':154}],['IN',{'IN':24}],['BC',{'BC':1}]],221);
+bars('tier',[['A 档',{'A档':4}],['B 档',{'B档':173}],['C 档',{'C档':36}],['仅欺诈',{'仅欺诈':8}]],221);
+bars('conf',[['确定',{'确定':176}],['疑似',{'疑似':45}]],221);
+const beh=[['威胁公开曝光 B',76,25],['威胁通知联系人 B',53,0],['定位/上门 B',45,0],['限时施压 C',41,0],['BG 私人收款 疑似',0,34],['指控欺诈 C',27,0],['模糊后果 C',13,10],['模糊信息处置 C',15,1],['虚构法律 C',2,4],['向第三方转达 B',5,0],['侮辱辱骂 A',3,0],['BI 违规减免 疑似',0,3],['威胁伤害 A',1,1]];
+document.getElementById('beh').innerHTML=beh.map(([l,a,b])=>`<div class=row><div class=lbl>${l}</div><div style="flex:1;min-width:0"><div class=bar style="width:${(a+b)/101*100}%"><div style="width:${a/(a+b)*100}%;background:#d9534f">${a||''}</div><div style="width:${b/(a+b)*100}%;background:#e8a8a6">${b||''}</div></div></div><div class=tot>${a+b}</div></div>`).join('')+'<div class=legend><i style="background:#d9534f"></i>确定<i style="background:#e8a8a6"></i>疑似</div>';
+</script></body></html>
